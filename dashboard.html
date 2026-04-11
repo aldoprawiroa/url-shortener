@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slice | Analytics Dashboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Base Variables & Reset */
+        :root {
+            --bg-obsidian: #09090b;
+            --bg-sidebar: #0f0f13;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-purple: #9333ea;
+            --accent-blue: #3b82f6;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.06);
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-obsidian);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+        }
+
+        /* Ambient Glow (Background Blobs) */
+        .glow-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .blob-1 {
+            top: -20%; left: 10%; width: 40vw; height: 40vw;
+            background: radial-gradient(circle, rgba(147,51,234,0.3) 0%, transparent 70%);
+        }
+        .blob-2 {
+            bottom: -20%; right: -10%; width: 50vw; height: 50vw;
+            background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
+        }
+
+        /* Layout Architecture */
+        .dashboard-layout {
+            display: flex;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background: rgba(15, 15, 19, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            height: 100vh;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 48px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo svg { stroke: var(--text-primary); }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: var(--glass-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(to right, rgba(147, 51, 234, 0.1), transparent);
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            color: var(--danger);
+        }
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: 260px; /* Offset for fixed sidebar */
+            padding: 40px 5%;
+            max-width: 1400px;
+        }
+
+        /* Top Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .header-title p {
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 25px rgba(147, 51, 234, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Glass Cards (Re-used architecture) */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .stat-icon {
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .stat-trend {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--danger); }
+
+        /* Chart Section */
+        .chart-section {
+            margin-bottom: 32px;
+        }
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* Table Section */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto; /* Horizontal scroll on mobile */
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+        
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .td-short a {
+            color: var(--accent-blue);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .td-short a:hover { text-decoration: underline; }
+        
+        .td-original {
+            color: var(--text-secondary);
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+        }
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 4px;
+        }
+        .icon-btn:hover { color: var(--text-primary); }
+        .icon-btn.delete:hover { color: var(--danger); }
+
+        /* --- MOBILE FIX & RESPONSIVENESS --- */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-layout {
+                flex-direction: column;
+            }
+
+            /* Transform Sidebar to Bottom Nav */
+            .sidebar {
+                width: 100%;
+                height: 70px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                top: auto;
+                flex-direction: row;
+                padding: 0 16px;
+                border-right: none;
+                border-top: 1px solid var(--glass-border);
+                z-index: 100;
+                justify-content: space-around;
+                align-items: center;
+                background: rgba(9, 9, 11, 0.9); /* More opaque for reading over content */
+            }
+
+            .logo { display: none; } /* Hide logo on mobile bottom bar */
+            
+            .nav-menu {
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-between;
+                gap: 0;
+            }
+
+            .nav-item {
+                flex-direction: column;
+                gap: 4px;
+                padding: 8px;
+                font-size: 0.7rem;
+                border-left: none;
+                border-radius: 8px;
+            }
+
+            .nav-item.active {
+                border-left: none;
+                border-bottom: 2px solid var(--accent-purple);
+                background: transparent;
+                color: var(--accent-purple);
+            }
+
+            .nav-item span { display: none; } /* Hide text on very small screens, show only icons */
+            
+            /* Main content adjustments */
+            .main-content {
+                margin-left: 0;
+                padding: 24px 5% 100px 5%; /* Bottom padding to clear nav bar */
+            }
+
+            .top-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow-blob blob-1"></div>
+    <div class="glow-blob blob-2"></div>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                Slice
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    <span>My Links</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Settings</span>
+                </a>
+                <a href="index.html" class="nav-item logout-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-title">
+                    <h1>Welcome back, Architect</h1>
+                    <p>Here is your infrastructure overview for today.</p>
+                </div>
+                <button class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <a href="index.html">Create New Link</a>
+                </button>
+            </header>
+
+            <section class="stats-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-header">
+                        Total Active Links
+                        <div class="stat-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value">1,248</div>
+                    <div class="stat-trend trend-up">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        +12% this week
+                    </div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-header">
+                        Total Clicks
+                        <div class="stat-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value">84.2K</div>
+                    <div class="stat-trend trend-up">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        +24% this week
+                    </div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-header">
+                        Avg. CTR
+                        <div class="stat-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value">14.8%</div>
+                    <div class="stat-trend trend-down">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                        -2.1% this week
+                    </div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-header">
+                        Burned Links
+                        <div class="stat-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L3 8l5 5-5 5c-.4.4-.4 1 0 1.4l1.6 1.6c.4.4 1 .4 1.4 0l5-5 5 5l1.2-.7c.4-.2.7-.6.6-1.1z"></path></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value">156</div>
+                    <div class="stat-trend trend-up">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        Self-destructed
+                    </div>
+                </div>
+            </section>
+
+            <section class="chart-section glass-card">
+                <h2 class="section-title">Traffic Overview (Last 7 Days)</h2>
+                <div class="chart-container">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </section>
+
+            <section class="table-section glass-card">
+                <h2 class="section-title">Recent Infrastructure Links</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Short Code</th>
+                                <th>Original URL</th>
+                                <th>Clicks</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="td-short"><a href="#">nex.us/alpha</a></td>
+                                <td class="td-original">https://company.com/campaign/q3-launch/metrics</td>
+                                <td>14,230</td>
+                                <td>Oct 12, 2023</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="icon-btn" onclick="copyToClipboard('nex.us/alpha')" title="Copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                                        <button class="icon-btn delete" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-short"><a href="#">nex.us/beta-test</a></td>
+                                <td class="td-original">https://internal.docs.dev/api/v4/endpoints/auth</td>
+                                <td>8,901</td>
+                                <td>Oct 10, 2023</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="icon-btn" onclick="copyToClipboard('nex.us/beta-test')" title="Copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                                        <button class="icon-btn delete" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td-short"><a href="#">nex.us/x99z1</a></td>
+                                <td class="td-original">https://twitter.com/i/status/17112003...</td>
+                                <td>1,450</td>
+                                <td>Oct 08, 2023</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="icon-btn" onclick="copyToClipboard('nex.us/x99z1')" title="Copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                                        <button class="icon-btn delete" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Chart.js Initialization ---
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+            
+            // Create Gradient for the line chart fill
+            const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientFill.addColorStop(0, 'rgba(147, 51, 234, 0.4)'); // Bright purple
+            gradientFill.addColorStop(1, 'rgba(147, 51, 234, 0.0)'); // Transparent
+
+            const trafficData = {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Total Clicks',
+                    data: [1200, 1900, 1500, 2200, 3100, 2800, 3800],
+                    borderColor: '#9333ea', // Accent Purple
+                    backgroundColor: gradientFill,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#09090b',
+                    pointBorderColor: '#3b82f6', // Accent Blue
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.4 // Smooth bezier curves
+                }]
+            };
+
+            const trafficConfig = {
+                type: 'line',
+                data: trafficData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(9, 9, 11, 0.9)',
+                            titleColor: '#94a3b8',
+                            bodyColor: '#f8fafc',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' clicks';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { family: "'Plus Jakarta Sans', sans-serif" }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { family: "'Plus Jakarta Sans', sans-serif" }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                }
+            };
+
+            new Chart(ctx, trafficConfig);
+
+            // --- Mobile Nav Active State logic ---
+            const navItems = document.querySelectorAll('.nav-item:not(.logout-btn)');
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navItems.forEach(n => n.classList.remove('active'));
+                    item.classList.add('active');
+                });
+            });
+        });
+
+        // --- Utility Function for Mock Copy ---
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`Copied ${text} to clipboard!`);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
