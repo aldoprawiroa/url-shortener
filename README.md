@@ -65,6 +65,5 @@ Repo ini belum menyertakan berkas lisensi. Hak penggunaan dan redistribusi belum
 
 ## Rilis
 
-- [V1](https://github.com/aldoprawiroa/url-shortener/releases/tag/v1.0.0): kondisi repo sebelum pembaruan dokumentasi ini.
-- [V2](https://github.com/aldoprawiroa/url-shortener/releases/tag/v2.0.0): README yang lebih lengkap dan mencatat batasan prototipe.
+Riwayat rilis akan tersedia di [halaman Releases](https://github.com/aldoprawiroa/url-shortener/releases). Rencana penomoran: V1 untuk snapshot awal repo, V2 untuk pembaruan dokumentasi ini.
 
