@@ -1,123 +1,83 @@
-/* =============================================================================
-   base.css — Design Tokens, Reset, Keyframes, Utilities
-   Slice v2.0 | Shared across all pages
-   ============================================================================= */
-
-/* ─── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
-  /* Colors */
-  --bg-obsidian:    #09090b;
-  --bg-sidebar:     #0f0f13;
-  --text-primary:   #f8fafc;
-  --text-secondary: #94a3b8;
-  --accent-purple:  #9333ea;
-  --accent-blue:    #3b82f6;
-
-  /* Semantic — BUG FIX: both were missing from original style.css */
-  --danger:  #ef4444;
-  --success: #10b981;
-
-  /* Glass system */
-  --glass-bg:     rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-hover:  rgba(255, 255, 255, 0.06);
-
-  /* Typography */
-  --font-family: 'Plus Jakarta Sans', sans-serif;
-
-  /* Motion */
-  --transition-base: 0.3s ease;
-  --transition-smooth: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --page: #f5f2ec;
+  --surface: #fffefa;
+  --surface-muted: #ece7dd;
+  --text: #27231e;
+  --muted: #5b554c;
+  --line: #7f766a;
+  --accent: #552e83;
+  --accent-contrast: #ffffff;
+  --focus: #1b5fae;
+  --danger: #9c2f2f;
+  --radius: 0.75rem;
 }
 
-/* ─── Box Model Reset ────────────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #191817;
+  --surface: #24211e;
+  --surface-muted: #302c28;
+  --text: #f4efe8;
+  --muted: #c3b9ad;
+  --line: #858077;
+  --accent: #d3b7ff;
+  --accent-contrast: #21162e;
+  --focus: #9ac4ff;
+  --danger: #ffaaa0;
+}
+
+* {
   box-sizing: border-box;
 }
 
-/* ─── Base Body ──────────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: var(--font-family);
-  background-color: var(--bg-obsidian);
-  color: var(--text-primary);
   min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
-/* ─── Ambient Glow Blobs ─────────────────────────────────────────────────────── */
-.glow-blob {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(140px);
-  z-index: 0;
-  opacity: 0.4;
-  pointer-events: none;
-}
-.blob-1 {
-  top: -10%;
-  left: -10%;
-  width: 50vw;
-  height: 50vw;
-  background: radial-gradient(circle, rgba(147, 51, 234, 0.4) 0%, transparent 70%);
-}
-.blob-2 {
-  bottom: -10%;
-  right: -10%;
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+button,
+input {
+  font: inherit;
 }
 
-/* ─── Keyframes ──────────────────────────────────────────────────────────────── */
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes toast-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ─── Spinner Utility ────────────────────────────────────────────────────────── */
-.spinner-icon {
-  animation: spin 1s linear infinite;
-  flex-shrink: 0;
-}
-
-/* ─── Link Reset ─────────────────────────────────────────────────────────────── */
 a {
-  color: inherit;
-  text-decoration: none;
-  transition: opacity var(--transition-base), color var(--transition-base);
+  color: var(--accent);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
 }
+
 a:hover {
-  opacity: 0.8;
+  text-decoration-thickness: 0.14em;
 }
 
-/* ─── Utility Classes ────────────────────────────────────────────────────────── */
-.hidden {
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+[hidden] {
   display: none !important;
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.btn--full {
-  width: 100%;
 }

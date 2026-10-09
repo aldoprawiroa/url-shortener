@@ -1,69 +1,68 @@
 # Slice
 
-Slice adalah prototipe antarmuka pemendek tautan berbasis HTML, CSS, dan JavaScript. Repo ini berisi frontend statis untuk halaman pemendek tautan dan dashboard.
+Slice adalah prototipe antarmuka pemendek tautan berbasis HTML, CSS, dan JavaScript. Repository ini berisi frontend statis untuk memeriksa format URL dan melihat pratinjau alias.
 
-> **Status:** demo frontend. Belum ada backend, database, autentikasi, atau layanan redirect. Tautan `slice.link/...` yang tampil di demo tidak dapat membuka URL tujuan.
+> **Status:** demo frontend statis. Tidak ada backend, database, autentikasi, redirect, penyimpanan tautan, atau pengumpulan analitik. Tombol pratinjau tidak membuat tautan pendek yang dapat digunakan.
 
-## Fitur demo
+## Yang tersedia
 
-- Memvalidasi dan menormalkan URL sebelum diproses.
-- Membuat alias acak atau menerima alias khusus, lalu menampilkan hasil dalam format `slice.link/<alias>`.
-- Menampilkan QR code dan menyediakan aksi salin serta berbagi melalui X atau WhatsApp.
-- Menampilkan formulir untuk kata sandi, tanggal kedaluwarsa, dan opsi hapus setelah satu klik.
-- Menyediakan modal sign-in/sign-up dan dashboard contoh.
-
-Data tautan hanya disimpan di memori halaman dan hilang saat halaman dimuat ulang. Formulir autentikasi hanya memeriksa format input sebelum membuka dashboard. Opsi kata sandi, kedaluwarsa, dan hapus setelah satu klik belum diterapkan pada redirect. Angka, grafik, serta baris pada dashboard adalah data contoh statis, bukan analitik pengguna.
+- Memeriksa URL HTTP atau HTTPS dengan parser URL bawaan browser.
+- Memeriksa alias 3 sampai 30 karakter: huruf kecil, angka, dan tanda hubung tunggal di antara kata.
+- Menampilkan pratinjau path alias tanpa mengirim atau menyimpan URL tujuan.
+- Membuka halaman dashboard demo dengan status kosong yang menjelaskan batasan data.
+- Mengganti tema terang dan gelap. Pilihan tema disimpan di localStorage; data URL dan alias tidak disimpan.
 
 ## Menjalankan secara lokal
 
-Karena halaman memakai JavaScript ES modules, jalankan melalui server HTTP lokal, bukan dengan membuka `index.html` langsung.
+JavaScript menggunakan ES modules, jadi sajikan file melalui server HTTP lokal. Dari direktori repository jalankan:
 
-```bash
-python -m http.server 8000
-```
+    python -m http.server 8000
 
-Buka [http://localhost:8000](http://localhost:8000). Tekan `Ctrl+C` di terminal untuk menghentikan server.
+Buka [http://localhost:8000](http://localhost:8000). Hentikan server dengan Ctrl+C.
 
-Halaman memakai Google Fonts, QRCode.js, dan Chart.js dari CDN. Koneksi internet diperlukan untuk memuat aset tersebut.
+Proyek ini tidak memerlukan proses build, framework, package manager, atau koneksi CDN. Font berasal dari system font stack agar antarmuka tetap tampil tanpa mengunduh font.
+
+## Halaman
+
+- index.html: formulir pemeriksaan URL dan pratinjau alias.
+- dashboard.html: batasan data tautan dan analitik yang tersedia pada demo statis.
 
 ## Struktur proyek
 
-```text
-.
-├── index.html          # Halaman utama dan modal autentikasi demo
-├── dashboard.html      # Dashboard dengan data contoh
-├── css/
-│   ├── base.css        # Reset, token warna, dan utilitas
-│   ├── components.css  # Form, tombol, modal, dan komponen
-│   ├── dashboard.css   # Gaya khusus dashboard
-│   └── layout.css      # Tata letak halaman utama
-└── js/
-    ├── dashboard.js   # Grafik dan aksi tabel demo
-    ├── main.js        # Validasi dan alur halaman utama
-    ├── state.js       # Data tautan sementara di memori
-    ├── ui.js          # Toast, modal, QR code, dan clipboard
-    └── validator.js   # Validasi URL, kata sandi, dan username
-```
-
-## Teknologi
-
-- HTML5 dan CSS3
-- JavaScript ES modules tanpa framework
-- [QRCode.js](https://github.com/davidshimjs/qrcodejs) untuk QR code
-- [Chart.js](https://www.chartjs.org/) untuk grafik dashboard contoh
-- Plus Jakarta Sans melalui Google Fonts
+    .
+    ├── DESIGN.md
+    ├── README.md
+    ├── index.html
+    ├── dashboard.html
+    ├── anti-slop/
+    │   ├── audit-001-2026-10-09.md
+    │   └── follow-up-001-2026-10-09.md
+    ├── css/
+    │   ├── base.css
+    │   ├── components.css
+    │   ├── dashboard.css
+    │   └── layout.css
+    └── js/
+        ├── main.js
+        ├── theme.js
+        └── validator.js
 
 ## Batasan dan keamanan
 
-Jangan gunakan demo ini untuk menyimpan tautan atau informasi sensitif. Pemeriksaan kata sandi dan username berjalan di browser, tidak mengamankan tautan, dan tidak menggantikan autentikasi server. Alias yang ditampilkan juga tidak memiliki layanan redirect.
+Pratinjau alias hanya memeriksa input di browser. URL tujuan tidak dikirim ke server atau disimpan, dan path yang ditampilkan bukan alamat redirect. Tema adalah satu-satunya preferensi yang disimpan di browser.
 
-Untuk menjadi pemendek tautan yang berfungsi, proyek ini memerlukan backend untuk menyimpan alias dan tujuan, menangani redirect, menegakkan kedaluwarsa atau hapus sekali pakai, mengelola autentikasi, serta mencatat klik.
+> Jangan gunakan demo ini untuk menyimpan tautan atau informasi sensitif. Pemeriksaan di browser tidak menggantikan validasi server atau autentikasi. Untuk membuat layanan pemendek tautan, proyek ini masih memerlukan backend untuk menyimpan alias dan URL tujuan, menangani redirect, mengelola akun bila dibutuhkan, serta mencatat klik sebelum analitik dapat ditampilkan.
 
-## Lisensi
+## Arah visual dan audit
 
-Repo ini belum menyertakan berkas lisensi. Hak penggunaan dan redistribusi belum ditetapkan.
+Keputusan visual dan alasan penggunaannya tercatat di [DESIGN.md](DESIGN.md). Audit After dan laporan tindak lanjut tersedia di [audit-001-2026-10-09.md](anti-slop/audit-001-2026-10-09.md) dan [follow-up-001-2026-10-09.md](anti-slop/follow-up-001-2026-10-09.md).
 
 ## Rilis
 
-Riwayat rilis akan tersedia di [halaman Releases](https://github.com/aldoprawiroa/url-shortener/releases). Rencana penomoran: V1 untuk snapshot awal repo, V2 untuk pembaruan dokumentasi ini.
+- [V1.0.0: snapshot awal](https://github.com/aldoprawiroa/url-shortener/releases/tag/v1.0.0)
+- [V2.0.0: demo transparan dan perbaikan audit](https://github.com/aldoprawiroa/url-shortener/releases/tag/v2.0.0)
+- [Semua rilis](https://github.com/aldoprawiroa/url-shortener/releases)
 
+## Lisensi
+
+Repository ini belum menyertakan file lisensi. Hak penggunaan dan redistribusi belum ditetapkan.

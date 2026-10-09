@@ -1,350 +1,61 @@
-/* =============================================================================
-   dashboard.css — Dashboard Page Layout & Components
-   Slice v2.0 | sidebar, stats, chart, table, mobile bottom-nav
-   ============================================================================= */
-
-/* ─── Dashboard Root Layout ──────────────────────────────────────────────────── */
-body {
+.dashboard-frame {
   display: flex;
-}
-
-.dashboard-layout {
-  display: flex;
-  width: 100%;
-  position: relative;
-  z-index: 1;
-}
-
-/* ─── Sidebar ────────────────────────────────────────────────────────────────── */
-.sidebar {
-  width: 260px;
-  background: rgba(15, 15, 19, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid var(--glass-border);
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 24px;
-  transition: all var(--transition-base);
-  z-index: 100;
-}
-
-.sidebar .logo {
-  font-size: 24px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 48px;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #fff, var(--text-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.sidebar .logo svg {
-  stroke: var(--text-primary);
-  flex-shrink: 0;
-}
-
-/* ─── Nav Menu ───────────────────────────────────────────────────────────────── */
-.nav-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 16px;
-  color: var(--text-secondary);
-  text-decoration: none;
-  border-radius: 12px;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: all var(--transition-base);
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  font-family: var(--font-family);
-  width: 100%;
-  text-align: left;
-}
-.nav-item:hover {
-  background: var(--glass-hover);
-  color: var(--text-primary);
-}
-.nav-item.active {
-  background: linear-gradient(to right, rgba(147, 51, 234, 0.12), transparent);
-  border-left: 3px solid var(--accent-purple);
-  color: var(--text-primary);
-}
-.logout-btn {
-  margin-top: auto;
-  color: var(--danger) !important;
-}
-.logout-btn:hover {
-  background: rgba(239, 68, 68, 0.08) !important;
-  color: #f87171 !important;
-}
-
-/* ─── Main Content ───────────────────────────────────────────────────────────── */
-.main-content {
-  flex: 1;
-  margin-left: 260px;
-  padding: 40px 5%;
-  max-width: 1400px;
   min-height: 100vh;
-}
-
-/* ─── Top Header ─────────────────────────────────────────────────────────────── */
-.top-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-}
-.header-title h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-.header-title p {
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-
-/* Dashboard buttons (slightly compact vs index) */
-.dashboard-layout .btn {
-  padding: 14px 28px;
-  font-size: 0.95rem;
-}
-
-/* ─── Stats Grid ─────────────────────────────────────────────────────────────── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.stat-card {
-  display: flex;
   flex-direction: column;
-  gap: 12px;
 }
-.stat-header {
+
+.dashboard-main {
+  width: min(100%, 56rem);
+  flex: 1;
+  margin-inline: auto;
+  padding-block: clamp(2.5rem, 7vw, 5rem);
+}
+
+.dashboard-overview {
+  max-width: 47rem;
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.dashboard-overview h1 {
+  max-width: none;
+}
+
+.dashboard-section {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-.stat-icon {
-  padding: 8px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-.stat-trend {
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.trend-up   { color: var(--success); }
-.trend-down { color: var(--danger); }
-
-/* ─── Chart Section ──────────────────────────────────────────────────────────── */
-.chart-section {
-  margin-bottom: 32px;
-}
-.section-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-.chart-container {
-  position: relative;
-  height: 350px;
-  width: 100%;
+  gap: 1.5rem;
+  border-top: 1px solid var(--line);
+  padding-block: 1.5rem;
+  scroll-margin-top: 1rem;
 }
 
-/* ─── Table Section ──────────────────────────────────────────────────────────── */
-.table-section {
-  border-radius: 20px;
-}
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
+.dashboard-section > div {
+  max-width: 38rem;
 }
 
-.links-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 680px;
-}
-.links-table th,
-.links-table td {
-  padding: 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--glass-border);
-}
-.links-table th {
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-.links-table tbody tr {
-  transition: background var(--transition-base);
-}
-.links-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
-}
-.links-table tbody tr:last-child td {
-  border-bottom: none;
+.dashboard-section h2 {
+  margin-bottom: 0.55rem;
 }
 
-.td-short a {
-  color: var(--accent-blue);
-  font-weight: 600;
-}
-.td-short a:hover {
-  text-decoration: underline;
-  opacity: 1;
-}
-.td-original {
-  color: var(--text-secondary);
-  max-width: 240px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.dashboard-section p {
+  margin: 0;
+  color: var(--muted);
 }
 
-.action-btns {
-  display: flex;
-  gap: 8px;
+.dashboard-nav {
+  gap: 0.25rem 0.8rem;
 }
 
-/* Table-specific icon buttons (no circle, text buttons style) */
-.table-icon-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
-  transition: color var(--transition-base), background var(--transition-base);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.table-icon-btn:hover {
-  color: var(--text-primary);
-  background: var(--glass-hover);
-}
-.table-icon-btn.icon-btn--delete:hover {
-  color: var(--danger);
-  background: rgba(239, 68, 68, 0.08);
-}
-
-/* ─── Responsive: Dashboard ──────────────────────────────────────────────────── */
-@media (max-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-layout {
-    flex-direction: column;
+@media (max-width: 760px) {
+  .dashboard-main {
+    padding-block: 2.25rem;
   }
 
-  /* Sidebar → Bottom Navigation Bar */
-  .sidebar {
-    width: 100%;
-    height: 70px;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    top: auto;
-    flex-direction: row;
-    padding: 0 16px;
-    border-right: none;
-    border-top: 1px solid var(--glass-border);
-    background: rgba(9, 9, 11, 0.92);
-    z-index: 100;
-    justify-content: space-around;
-    align-items: center;
-    height: 70px;
-  }
-
-  .sidebar .logo {
-    display: none;
-  }
-
-  .nav-menu {
-    flex-direction: row;
-    width: 100%;
-    justify-content: space-between;
-    gap: 0;
-    flex: unset;
-  }
-
-  .nav-item {
-    flex-direction: column;
-    gap: 4px;
-    padding: 8px 10px;
-    font-size: 0.7rem;
-    border-left: none !important;
-    border-radius: 8px;
-    flex: 1;
-    justify-content: center;
-    align-items: center;
-  }
-  .nav-item span {
-    font-size: 0.65rem;
-  }
-  .nav-item.active {
-    border-left: none;
-    border-bottom: 2px solid var(--accent-purple);
-    background: transparent;
-    color: var(--accent-purple);
-  }
-
-  /* Main content adjustments */
-  .main-content {
-    margin-left: 0;
-    padding: 24px 5% 100px; /* Extra bottom clearance for nav bar */
-  }
-  .top-header {
-    flex-direction: column;
+  .dashboard-section {
     align-items: flex-start;
-    gap: 16px;
+    flex-direction: column;
+    gap: 0.9rem;
   }
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  .chart-container {
-    height: 250px;
-  }
+
 }

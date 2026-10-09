@@ -1,231 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Slice | Analytics Dashboard</title>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <!-- Chart.js (CDN global, consumed by dashboard.js) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Stylesheets: base → components → dashboard (no style block, no duplication) -->
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/components.css" />
-  <link rel="stylesheet" href="css/dashboard.css" />
-</head>
-<body>
-
-  <!-- Ambient background blobs -->
-  <div class="glow-blob blob-1" aria-hidden="true"></div>
-  <div class="glow-blob blob-2" aria-hidden="true"></div>
-
-  <div class="dashboard-layout">
-
-    <!-- ── Sidebar Navigation ──────────────────────────────────────────── -->
-    <aside class="sidebar" role="navigation" aria-label="Dashboard navigation">
-
-      <div class="logo" aria-label="Slice">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-        </svg>
-        Slice
-      </div>
-
-      <!-- Nav items use button/a correctly; JS handles active state via delegation -->
-      <nav class="nav-menu">
-        <button class="nav-item active" data-section="overview" aria-current="page">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          <span>Overview</span>
-        </button>
-        <button class="nav-item" data-section="links">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-          <span>My Links</span>
-        </button>
-        <button class="nav-item" data-section="analytics">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-          <span>Analytics</span>
-        </button>
-        <button class="nav-item" data-section="settings">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          <span>Settings</span>
-        </button>
-
-        <!-- BUG FIX: was <a> inside <button>. Logout is a proper <a> tag. -->
-        <a href="index.html" class="nav-item logout-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          <span>Logout</span>
-        </a>
-      </nav>
-    </aside>
-
-    <!-- ── Main Content ─────────────────────────────────────────────────── -->
-    <main class="main-content">
-
-      <!-- Top Header -->
-      <header class="top-header">
-        <div class="header-title">
-          <h1>Welcome back, Architect</h1>
-          <p>Here is your infrastructure overview for today.</p>
-        </div>
-        <!-- BUG FIX: was <button><a href>. Now a single semantic <a> styled as btn. -->
-        <a href="index.html" class="btn btn-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Current limits of the Slice static dashboard demo." />
+    <title>Slice | Dashboard demo</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+  </head>
+  <body>
+    <div class="page-frame dashboard-frame">
+      <header class="site-header">
+        <a class="brand" href="index.html" aria-label="Slice home">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
           </svg>
-          Create New Link
+          <span>Slice</span>
         </a>
+        <nav class="header-actions dashboard-nav" aria-label="Dashboard sections">
+          <a href="#overview">Overview</a>
+          <a href="#links">My links</a>
+          <a href="#analytics">Analytics</a>
+          <button class="button button-quiet theme-toggle" type="button" data-theme-toggle aria-pressed="false">Use dark theme</button>
+        </nav>
       </header>
 
-      <!-- Stats Grid -->
-      <section class="stats-grid" aria-label="Statistics overview">
+      <main class="dashboard-main">
+        <section class="dashboard-overview" id="overview" aria-labelledby="page-title">
+          <p class="section-label">Static frontend demo</p>
+          <h1 id="page-title">Dashboard</h1>
+          <p class="lead">This repository has no account system, link database, or redirect service. The sections below show what the demo can currently report.</p>
+        </section>
 
-        <div class="glass-card stat-card">
-          <div class="stat-header">
-            Total Active Links
-            <div class="stat-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path></svg>
-            </div>
+        <section class="dashboard-section" id="links" aria-labelledby="links-title">
+          <div>
+            <h2 id="links-title">My links</h2>
+            <p>No links are stored by this frontend. An alias preview on the home page is not saved.</p>
           </div>
-          <div class="stat-value">1,248</div>
-          <div class="stat-trend trend-up" aria-label="+12% this week">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-            +12% this week
+          <a class="button button-secondary" href="index.html">Preview an alias</a>
+        </section>
+
+        <section class="dashboard-section" id="analytics" aria-labelledby="analytics-title">
+          <div>
+            <h2 id="analytics-title">Analytics</h2>
+            <p>No click data is collected because this project has no redirect service.</p>
           </div>
-        </div>
+        </section>
+      </main>
 
-        <div class="glass-card stat-card">
-          <div class="stat-header">
-            Total Clicks
-            <div class="stat-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-            </div>
-          </div>
-          <div class="stat-value">84.2K</div>
-          <div class="stat-trend trend-up" aria-label="+24% this week">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-            +24% this week
-          </div>
-        </div>
-
-        <div class="glass-card stat-card">
-          <div class="stat-header">
-            Avg. CTR
-            <div class="stat-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-            </div>
-          </div>
-          <div class="stat-value">14.8%</div>
-          <div class="stat-trend trend-down" aria-label="-2.1% this week">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
-            -2.1% this week
-          </div>
-        </div>
-
-        <div class="glass-card stat-card">
-          <div class="stat-header">
-            Burned Links
-            <div class="stat-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L3 8l5 5-5 5c-.4.4-.4 1 0 1.4l1.6 1.6c.4.4 1 .4 1.4 0l5-5 5 5l1.2-.7c.4-.2.7-.6.6-1.1z"></path></svg>
-            </div>
-          </div>
-          <div class="stat-value">156</div>
-          <div class="stat-trend trend-up" aria-label="Self-destructed">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-            Self-destructed
-          </div>
-        </div>
-
-      </section>
-
-      <!-- Traffic Chart -->
-      <section class="chart-section glass-card" aria-label="Traffic overview chart">
-        <h2 class="section-title">Traffic Overview (Last 7 Days)</h2>
-        <div class="chart-container">
-          <canvas id="trafficChart" role="img" aria-label="Line chart showing total clicks per day over the last 7 days"></canvas>
-        </div>
-      </section>
-
-      <!-- Links Table -->
-      <section class="table-section glass-card" aria-label="Recent links">
-        <h2 class="section-title">Recent Infrastructure Links</h2>
-        <div class="table-wrapper">
-          <!-- BUG FIX: All nex.us/ replaced with slice.link/ (brand consistency) -->
-          <!-- BUG FIX: inline onclick removed; event delegation in dashboard.js -->
-          <table class="links-table">
-            <thead>
-              <tr>
-                <th scope="col">Short Link</th>
-                <th scope="col">Original URL</th>
-                <th scope="col">Clicks</th>
-                <th scope="col">Created</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="td-short"><a href="#" target="_blank" rel="noopener noreferrer">slice.link/alpha</a></td>
-                <td class="td-original" title="https://company.com/campaign/q3-launch/metrics">https://company.com/campaign/q3-launch/metrics</td>
-                <td>14,230</td>
-                <td>Oct 12, 2023</td>
-                <td>
-                  <div class="action-btns">
-                    <button class="table-icon-btn icon-btn--copy" data-url="slice.link/alpha" title="Copy to clipboard" aria-label="Copy slice.link/alpha">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    </button>
-                    <button class="table-icon-btn icon-btn--delete" title="Delete link" aria-label="Delete slice.link/alpha">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="td-short"><a href="#" target="_blank" rel="noopener noreferrer">slice.link/beta-test</a></td>
-                <td class="td-original" title="https://internal.docs.dev/api/v4/endpoints/auth">https://internal.docs.dev/api/v4/endpoints/auth</td>
-                <td>8,901</td>
-                <td>Oct 10, 2023</td>
-                <td>
-                  <div class="action-btns">
-                    <button class="table-icon-btn icon-btn--copy" data-url="slice.link/beta-test" title="Copy to clipboard" aria-label="Copy slice.link/beta-test">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    </button>
-                    <button class="table-icon-btn icon-btn--delete" title="Delete link" aria-label="Delete slice.link/beta-test">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="td-short"><a href="#" target="_blank" rel="noopener noreferrer">slice.link/x99z1</a></td>
-                <td class="td-original" title="https://x.com/i/status/17112003...">https://x.com/i/status/17112003...</td>
-                <td>1,450</td>
-                <td>Oct 08, 2023</td>
-                <td>
-                  <div class="action-btns">
-                    <button class="table-icon-btn icon-btn--copy" data-url="slice.link/x99z1" title="Copy to clipboard" aria-label="Copy slice.link/x99z1">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    </button>
-                    <button class="table-icon-btn icon-btn--delete" title="Delete link" aria-label="Delete slice.link/x99z1">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-    </main>
-  </div>
-
-  <!-- ES Module entry point -->
-  <script type="module" src="js/dashboard.js"></script>
-</body>
+      <footer class="site-footer">
+        <span>Slice static frontend demo</span>
+        <a href="https://github.com/aldoprawiroa/url-shortener/releases">Release history</a>
+      </footer>
+    </div>
+    <script type="module" src="js/theme.js"></script>
+  </body>
 </html>
